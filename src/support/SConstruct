@@ -1,0 +1,28 @@
+#import os
+#import sys
+
+
+# Define system environmen with all shell variables.
+#env = Environment(CPPPATH = ["../include", "../../../../../lib/netcdf-4.1.3/include/"])
+env = Environment(CPPPATH = ["./", "../src", "../../../../../src/netcdf-4.1.3/fortran", "../include/", "../../../../src/include/make_dummies_libs/"])
+
+#c_compiler = "gcc"
+
+#env.Program('*.c')
+#env = Environment()
+#gribex = Program[("gribex.c")]
+#Repository('/beegfs/work/epgbo01/src/netcdf-4.1.3/fortran')
+#
+#
+#
+#
+source_files1 = [
+	"util_convert.c",
+	"util_pbio.c",
+	"util_reshape.c",
+	"util_sysinfo.c",
+	"util_system.c",
+	"util_timer.c"
+	
+    ]
+env.Program(target="master", source=source_files1)

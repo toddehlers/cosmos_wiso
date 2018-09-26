@@ -1,0 +1,169 @@
+# SConstruct build file for scons
+# Version 0.1 (2018.05.17), written by Willi Kappler
+
+import os
+import sys
+
+# Add our own command line option for debug builds
+AddOption("--debug-build", action="store_true", dest="debug_build")
+
+# Define system environmen with all shell variables.
+
+#fortran_path = [".", "../clim", "../psmile", "../fscint", "../anaism", "../anaisg/",
+#    "../scrip", "../../lib/netcdf"]
+fortran_path = ["../lib/netcdf", "support", "echam5j/echam"]
+
+env = Environment(ENV = os.environ,
+    F77PATH = fortran_path,
+    F90PATH = fortran_path,
+    F95PATH = fortran_path,
+    FORTRANPATH = fortran_path,
+)
+
+# Only change environmemt if we do a real build
+if not (GetOption("help") or GetOption("clean")):
+    debug_build = GetOption("debug_build")
+
+    # Specify your compiler and flags here:
+    #compiler = "ifort"
+    compiler = "mpif90"
+    #compile_flags = "-fpp -warn all"
+    compile_flags = "-cpp -O3"
+
+    c_compiler = "gcc"
+    c_flags = "-Wall -Wextra"
+    c_debug_flags = "-g3"
+    c_optimize_flags = "-O3"
+
+
+    cpppath = fortran_path
+
+    debug_flags = "-fpp -g -check all -debug all"
+    #optimize_flags = "-fast"
+    optimize_flags = ""
+    link_flags_debug = "-g -check all -debug all"
+    #link_flags_release = "-fast"
+    link_flags_release = ""
+
+    env.Replace(LINK = compiler)
+    env.Replace(F77 = compiler)
+    env.Replace(F90 = compiler)
+    env.Replace(F95 = compiler)
+    env.Replace(FORTRAN = compiler)
+    
+    env.Append(FORTRANFLAGS = compile_flags)
+    env.Append(F77FLAGS = compile_flags)
+    env.Append(F90FLAGS = compile_flags)
+    env.Append(F95FLAGS = compile_flags)
+
+    # C compiler
+    env.Replace(CC = c_compiler)
+    env.Append(CCFLAGS = c_flags)
+    env.Append(CPPPATH = cpppath)
+    #env.Append(CPPDEFINES=["mips"])
+
+    if debug_build:
+      env.Append(FORTRANFLAGS = debug_flags)
+      env.Append(F77FLAGS = debug_flags)
+      env.Append(F90FLAGS = debug_flags)
+      env.Append(F95FLAGS = debug_flags)
+      env.Append(LINKFLAGS = link_flags_debug)
+      env.Append(CCFLAGS = c_debug_flags)
+    else:
+      env.Append(FORTRANFLAGS = optimize_flags)
+      env.Append(F77FLAGS = optimize_flags)
+      env.Append(F90FLAGS = optimize_flags)
+      env.Append(F95FLAGS = optimize_flags)
+      env.Append(LINKFLAGS = link_flags_release)
+      env.Append(CCFLAGS = c_optimize_flags)
+
+#source_folders = ["psmile", "clim", "fscint", "anaism", "anaisg", "scrip"]
+#source_folders_jsbalone = ["echam5j/jsbach"]
+#source_folders_cbalone = ["echam5j/jsbach"]
+source_folders_master = ["echam5j/echam", "lapack", "support", "blas"]
+
+#source_files = ["parse.f90", "skip.f90", "parseblk.f90",
+#    "alloc_src.f90", "dealloc_src.f90"] + Glob("*.f") + Glob("*.F") + Glob("*.F90") + Glob("*.c")
+
+#source_files_jsbalone = []
+#source_files_cbalone = []
+source_files_master = ["echam5j/jsbach/mo_jsbach_interface.f90",
+	"echam5j/jsbach/mo_jsbach.f90",
+	"echam5j/jsbach/mo_land_surface.f90",
+	"echam5j/jsbach/mo_cbal_landcover_change.f90",
+	"echam5j/jsbach/mo_jsbach_grid.f90",
+	"echam5j/jsbach/mo_dynveg.f90",
+	"echam5j/jsbach/mo_utils.f90",
+	"echam5j/jsbach/mo_bethy.f90",
+	"echam5j/jsbach/mo_soil.f90",
+	"echam5j/jsbach/mo_cbal_bethy.f90",
+	"echam5j/jsbach/mo_phenology.f90",
+	"echam5j/jsbach/mo_jsbach_comm_to_echam5mods.f90",
+	"echam5j/jsbach/mo_temp.f90",
+	"echam5j/jsbach/mo_climbuf.f90",
+	"echam5j/jsbach/update_lai.f90",
+	"echam5j/jsbach/update_cover_fract.f90",
+	"echam5j/jsbach/mo_jsbach_veg.f90",
+	"echam5j/jsbach/mo_land_boundary.f90",
+	"echam5j/jsbach/mo_canopy.f90",
+	"echam5j/jsbach/mo_test.f90",
+	"echam5j/jsbach/mo_jsbach_lctlib.f90",
+	"echam5j/jsbach/jsbalone_init_decomp.f90",
+	"echam5j/jsbach/jsbalone_iniphy.f90",
+	"echam5j/jsbach/mo_lookup_tables.f90",
+	"echam5j/jsbach/mo_cbal_cpools.f90",
+	"echam5j/jsbach/mo_bethy_fapar.f90",
+	"echam5j/jsbach/mo_bethy_photosyn.f90",
+	"echam5j/jsbach/mo_atmosphere.f90",
+	"echam5j/jsbach/update_surfacetemp.f90",
+	"echam5j/jsbach/update_surf_down.f90",
+	"echam5j/jsbach/update_soiltemp.f90",
+	"echam5j/jsbach/update_surf_up.f90",
+	"echam5j/jsbach/mo_jsbach_time.f90",
+]
+
+#for folder in source_folders_jsbalone:
+#    source_files_jsbalone += Glob("{}/*.f".format(folder))
+#    source_files_jsbalone += Glob("{}/*.F".format(folder))
+#    source_files_jsbalone += Glob("{}/*.F90".format(folder))
+#    source_files_jsbalone += Glob("{}/*.f90".format(folder))
+#    source_files_jsbalone += Glob("{}/*.c".format(folder))
+
+#for folder in source_folders_cbalone:
+#    source_files_cbalone += Glob("{}/*.f".format(folder))
+#    source_files_cbalone += Glob("{}/*.F".format(folder))
+#    source_files_cbalone += Glob("{}/*.F90".format(folder))
+#    source_files_cbalone += Glob("{}/*.f90".format(folder))
+#    source_files_cbalone += Glob("{}/*.c".format(folder))
+
+for folder in source_folders_master:
+    source_files_master += Glob("{}/*.f".format(folder))
+    source_files_master += Glob("{}/*.F".format(folder))
+    source_files_master += Glob("{}/*.F90".format(folder))
+    source_files_master += Glob("{}/*.f90".format(folder))
+    source_files_master += Glob("{}/*.c".format(folder))
+
+#print("source_files_jsbalone: {}".format(source_files_jsbalone))
+
+# Library('foo', ['f1.c', 'f2.c', 'f3.c'])
+# Program('prog.c', LIBS=['foo', 'bar'], LIBPATH='.')
+
+#Program('prog.c', LIBS = 'm',
+#                  LIBPATH = ['/usr/lib', '/usr/local/lib'])
+
+
+#env.Program(target="jsbalone_driver", source=source_files_jsbalone,
+#    LIBS="netcdff",
+#    LIBPATH="../lib/netcdf"
+#)
+
+#env.Program(target="cbalone_driver", source=source_files_cbalone,
+#    LIBS="netcdff",
+#    LIBPATH="../lib/netcdf"
+#)
+
+env.Program(target="echam5", source=source_files_master,
+    LIBS="netcdff",
+    LIBPATH="../lib/netcdf"
+)
+

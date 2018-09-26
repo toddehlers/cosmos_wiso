@@ -1,0 +1,20 @@
+      MODULE MO_PARA2
+      USE MO_PARAM1
+      IMPLICIT NONE
+!
+!UWE
+!     AUXILIARY FIELDS FOR ITERATIVE SOLUTION OF BAROTROPIC MATRIX
+!     INITIALIZED IN ITPREP
+!
+      REAL, POINTER :: UF(:,:), VF(:,:), FF(:,:), XX(:,:)
+      REAL SORPAR
+
+      CONTAINS
+
+      SUBROUTINE alloc_mem_para2
+
+      ALLOCATE(UF(IE,JE),VF(IE,JE),FF(IE,JE),XX(IE,JE))
+
+      END SUBROUTINE alloc_mem_para2
+      
+      END MODULE MO_PARA2
