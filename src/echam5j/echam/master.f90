@@ -82,11 +82,8 @@ PROGRAM master
 
   ! Start MPI
 
-  print *, "echam5j.f90, call p_start"
-
   CALL p_start
 
-  print *, "echam5j.f90, finished p_start"
 
   IF (p_pe == p_io) THEN
 #if defined (__prism) 

@@ -3,8 +3,6 @@ MODULE mo_mpi
   ! Comment: Please use basic WRITE to nerr for messaging in the whole
   !          MPI package to achieve proper output. 
 
-#define DEBUG
-
 #ifdef _OPENMP
 #if (! defined __PGI)
   USE omp_lib,   ONLY: OMP_GET_MAX_THREADS, OMP_SET_NUM_THREADS
@@ -347,8 +345,6 @@ CONTAINS
 
     ! Executable statements:
 
-  print *, "echam5j, mo_mpi.f90, p_start"
-
     IF (PRESENT(model_name)) THEN
       yname = TRIM(model_name)
     ELSE
@@ -362,14 +358,7 @@ CONTAINS
     ! start MPI
 
 #ifndef NOMPI
-  print *, "echam5j, mo_mpi.f90, CALL MPI_INIT"
-  print *, "echam5j, mo_mpi.f90, p_error:", p_error
-
     CALL MPI_INIT (p_error)
-
-    CALL MPI_COMM_SET_ERRHANDLER(MPI_COMM_WORLD, MPI_ERRORS_RETURN)
-
- print *, "echam5j, mo_mpi.f90, CALL MPI_INIT finish"
 
     IF (p_error /= MPI_SUCCESS) THEN
        WRITE (nerr,'(a)') ' MPI_INIT failed.'
@@ -403,8 +392,6 @@ CONTAINS
 
 #else
 
-  print *, "echam5j, mo_mpi.f90, MPI_COMM_DUP"
-
     CALL MPI_COMM_DUP (MPI_COMM_WORLD, p_all_comm, p_error)
 
     IF (p_error /= MPI_SUCCESS) THEN
@@ -418,11 +405,7 @@ CONTAINS
     ! get local PE identification
 
 #ifndef NOMPI
-  print *, "echam5j, mo_mpi.f90, MPI_COMM_RANK"
-
     CALL MPI_COMM_RANK (p_all_comm, mype, p_error)
-
-    print *, "echam5j, mo_mpi.f90, current rank: ", mype
 
     IF (p_error /= MPI_SUCCESS) THEN
        WRITE (nerr,'(a)') ' MPI_COMM_RANK failed.'
@@ -440,8 +423,6 @@ CONTAINS
     ! get number of available PEs
 
 #ifndef NOMPI
-     print *, "echam5j, mo_mpi.f90, MPI_COMM_SIZE"
-
     CALL MPI_COMM_SIZE (p_all_comm, npes, p_error)
 
     IF (p_error /= MPI_SUCCESS) THEN
@@ -523,9 +504,6 @@ CONTAINS
 
     ! Information ...
 
-    !print *, "echam5j, mo_mpi.f90, env_threads:" env_threads
-    print *, "echam5j, mo_mpi.f90, env_threads:"
-
     IF (mype == 0) THEN    
        WRITE (nerr,'(/,a,a,a)') ' ', &
             TRIM(yname), ' MPI interface runtime information:'
@@ -586,8 +564,6 @@ CONTAINS
 #ifndef NOMPI
     ! Make number of threads from environment available to all model PEs
        
-    print *, "echam5j, mo_mpi.f90, MPI_BCAST"
-
     CALL MPI_BCAST (threads, 1, MPI_INTEGER, 0, p_all_comm, p_error)
 #endif
     
@@ -698,11 +674,6 @@ CONTAINS
        p_int_i8  = p_type (i8, integer_type) 
        p_real_sp = p_type (sp, real_type) 
        p_real_dp = p_type (dp, real_type) 
-
-       p_int_i4 = MPI_INTEGER8
-       p_int_i8 = MPI_INTEGER8
-       p_real_sp = MPI_DOUBLE_PRECISION
-       p_real_dp = MPI_DOUBLE_PRECISION
 
        IF (mype == 0) THEN
 

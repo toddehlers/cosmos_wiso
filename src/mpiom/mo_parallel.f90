@@ -37,7 +37,7 @@ MODULE mo_parallel
   INTEGER, PRIVATE :: p_ioff_g(0:maxproc), p_joff_g(0:maxproc)
   INTEGER, PRIVATE :: p_size_x(0:maxproc), p_size_y(0:maxproc)
 
-  REAL, PRIVATE :: t2d=0.0_dp, t3d=0.0_dp, ts, te
+  REAL(dp), PRIVATE :: t2d=0.0_dp, t3d=0.0_dp, ts, te
   INTEGER,  PRIVATE :: n2d=0, n3d=0, count=0
 
   INTERFACE bounds_exch
@@ -1457,8 +1457,8 @@ CONTAINS
     REAL                ::  arr2(ie,je), sarr(ie,je)
 
 
-    REAL, POINTER       ::  arr_g(:,:)
-    REAL, POINTER       ::  sarr_g(:,:)
+    REAL(wp), POINTER       ::  arr_g(:,:)
+    REAL(wp), POINTER       ::  sarr_g(:,:)
 
     if (p_pe==p_io) then
        ALLOCATE(arr_g(ie_g,je_g),sarr_g(ie_g,je_g))
@@ -1507,7 +1507,7 @@ CONTAINS
     REAL, INTENT(IN)    ::  arr(:,:)
     REAL, INTENT(INOUT) ::  su
 
-    REAL, ALLOCATABLE       ::  arr_g(:,:)
+    REAL(wp), ALLOCATABLE       ::  arr_g(:,:)
 
     if (p_pe==p_io) then
        ALLOCATE(arr_g(ie_g,je_g))
@@ -1727,7 +1727,7 @@ CONTAINS
     
     ! interface for 3D arrays
     
-    REAL, INTENT(IN) :: arr(:,:,:)
+    REAL(dp), INTENT(IN) :: arr(:,:,:)
     CHARACTER (LEN=*), INTENT(IN) :: text
     
     INTEGER :: k
@@ -1756,7 +1756,7 @@ CONTAINS
   
   SUBROUTINE print_stats
     
-    REAL :: t2, t3
+    REAL(dp) :: t2, t3
     INTEGER :: n
     
     IF(p_pe==p_io) THEN

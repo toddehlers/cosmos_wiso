@@ -3,9 +3,6 @@ MODULE mo_mpi
   ! Comment: Please use basic WRITE to nerr for messaging in the whole
   !          MPI package to achieve proper output. 
 
-
-#define DEBUG
-
 #ifdef _OPENMP
 #if (! defined __PGI)
   USE omp_lib,   ONLY: OMP_GET_MAX_THREADS, OMP_SET_NUM_THREADS, &
@@ -369,8 +366,6 @@ CONTAINS
 
     INTEGER :: jp
 
-    print *, "mo_mpi.f90, p_start: model_name: ", model_name
-
 
     ! Executable statements:
 
@@ -387,8 +382,6 @@ CONTAINS
     ! start MPI
 
 #ifndef NOMPI
-    print *, "mo_mpi.f90, CALL MPI_INIT"
-
     CALL MPI_INIT (p_error)
 
     IF (p_error /= MPI_SUCCESS) THEN
@@ -397,9 +390,6 @@ CONTAINS
        STOP
     END IF
 #endif
-
-    !CALL MPI_COMM_SET_ERRHANDLER(MPI_COMM_WORLD, MPI_ERRORS_RETURN)
-
 
     ! create communicator for this process alone before 
     ! potentially joining MPI2
@@ -425,7 +415,6 @@ CONTAINS
     ENDIF
 
 #else
-    print *, "mo_mpi.f90, CALL MPI_COMM_DUP"
 
     CALL MPI_COMM_DUP (MPI_COMM_WORLD, p_all_comm, p_error)
 
@@ -440,8 +429,6 @@ CONTAINS
     ! get local PE identification
 
 #ifndef NOMPI
-    print *, "mo_mpi.f90, CALL MPI_COMM_RANK"
-
     CALL MPI_COMM_RANK (p_all_comm, mype, p_error)
 
     IF (p_error /= MPI_SUCCESS) THEN
@@ -460,15 +447,7 @@ CONTAINS
     ! get number of available PEs
 
 #ifndef NOMPI
-    print *, "mo_mpi.f90, CALL MPI_COMM_SIZE"
-    print *, "p_all_comm: ", p_all_comm
-    print *, "npes: ", npes
-    print *, "p_error: ", p_error
-
     CALL MPI_COMM_SIZE (p_all_comm, npes, p_error)
-
-    print *, "mo_mpi.f90, finished CALL MPI_COMM_SIZE"
-    print *, "npes: ", npes
 
     IF (p_error /= MPI_SUCCESS) THEN
        WRITE (nerr,'(a,i4,a)') ' PE: ', mype, ' MPI_COMM_SIZE failed.'
@@ -549,7 +528,6 @@ CONTAINS
 
     ! Information ...
 
-
     IF (mype == 0) THEN    
        WRITE (nerr,'(/,a,a,a)') ' ', &
             TRIM(yname), ' MPI interface runtime information:'
@@ -582,9 +560,6 @@ CONTAINS
     ! That might be wrong in the coupled case when the model is
     ! started via MPI dynamic process creation. So we have to check
     ! the environment variable too. 
-
-    print *, "MPIOM_THREADS: ", MPIOM_THREADS
-  
  
     IF (mype == 0) THEN    
 
@@ -623,12 +598,8 @@ CONTAINS
 
 #ifndef NOMPI
     ! Make number of threads from environment available to all model PEs
-
-    print *, "mo_mpi.f90, call MPI_BCAST(threads, 1, MPI_INTEGER, ...)"
-           
+       
     CALL MPI_BCAST (threads, 1, MPI_INTEGER, 0, p_all_comm, p_error)
-
-    print *, "mo_mpi.f90, finished MPI_BCAST(threads, 1, MPI_INTEGER, ...)"
 #endif
     
     ! Inform on OpenMP thread usage
@@ -694,6 +665,7 @@ CONTAINS
           WRITE (nerr,'(a,i4)') ' Error =  ', p_error
           CALL p_abort
        END IF
+
        IF (mype == 0) THEN 
           WRITE (nerr,'(a,i1,a1,i1)') &
                '  Used MPI version: ', version, '.', subversion
@@ -738,15 +710,10 @@ CONTAINS
 
        ! testing this variables
 
-       !p_int_i4  = p_type (i4, integer_type) 
-       !p_int_i8  = p_type (i8, integer_type) 
-       !p_real_sp = p_type (sp, real_type) 
-       !p_real_dp = p_type (dp, real_type) 
-
-       p_int_i4 = MPI_INTEGER8
-       p_int_i8 = MPI_INTEGER8
-       p_real_sp = MPI_DOUBLE_PRECISION
-       p_real_dp = MPI_DOUBLE_PRECISION
+       p_int_i4  = p_type (i4, integer_type) 
+       p_int_i8  = p_type (i8, integer_type) 
+       p_real_sp = p_type (sp, real_type) 
+       p_real_dp = p_type (dp, real_type) 
 
        IF (mype == 0) THEN
 
@@ -829,8 +796,6 @@ CONTAINS
     WRITE (nerr,'(a,i4)') '  REAL single    :', p_real_sp
     WRITE (nerr,'(a,i4)') '  REAL double    :', p_real_dp
 #endif
-
-  print *, "mo_mpi.f90, end of p_start"
 
   END SUBROUTINE p_start
 
@@ -1391,7 +1356,7 @@ CONTAINS
 
   SUBROUTINE p_send_real (buffer, p_destination, p_tag, p_count, comm)
 
-    REAL, INTENT(in) :: buffer
+    REAL (dp), INTENT(in) :: buffer
     INTEGER,   INTENT(in) :: p_destination, p_tag
     INTEGER, OPTIONAL, INTENT(in) :: p_count, comm
 #ifndef NOMPI
@@ -1425,7 +1390,7 @@ CONTAINS
 
   SUBROUTINE p_send_real_1d (buffer, p_destination, p_tag, p_count, comm)
 
-    REAL, INTENT(in) :: buffer(:)
+    REAL (dp), INTENT(in) :: buffer(:)
     INTEGER,   INTENT(in) :: p_destination, p_tag
     INTEGER, OPTIONAL, INTENT(in) :: p_count, comm
 #ifndef NOMPI
@@ -1459,7 +1424,7 @@ CONTAINS
 
   SUBROUTINE p_send_real_2d (buffer, p_destination, p_tag, p_count, comm)
 
-    REAL, INTENT(in) :: buffer(:,:)
+    REAL (dp), INTENT(in) :: buffer(:,:)
     INTEGER,   INTENT(in) :: p_destination, p_tag
     INTEGER, OPTIONAL, INTENT(in) :: p_count, comm
 #ifndef NOMPI
@@ -1493,7 +1458,7 @@ CONTAINS
 
   SUBROUTINE p_send_real_3d (buffer, p_destination, p_tag, p_count, comm)
 
-    REAL, INTENT(in) :: buffer(:,:,:)
+    REAL (dp), INTENT(in) :: buffer(:,:,:)
     INTEGER,   INTENT(in) :: p_destination, p_tag
     INTEGER, OPTIONAL, INTENT(in) :: p_count, comm
 #ifndef NOMPI
@@ -1527,7 +1492,7 @@ CONTAINS
 
   SUBROUTINE p_send_real_4d (buffer, p_destination, p_tag, p_count, comm)
 
-    REAL, INTENT(in) :: buffer(:,:,:,:)
+    REAL (dp), INTENT(in) :: buffer(:,:,:,:)
     INTEGER,   INTENT(in) :: p_destination, p_tag
     INTEGER, OPTIONAL, INTENT(in) :: p_count, comm
 #ifndef NOMPI
@@ -1561,7 +1526,7 @@ CONTAINS
 
   SUBROUTINE p_send_real_5d (buffer, p_destination, p_tag, p_count, comm)
 
-    REAL, INTENT(in) :: buffer(:,:,:,:,:)
+    REAL (dp), INTENT(in) :: buffer(:,:,:,:,:)
     INTEGER,   INTENT(in) :: p_destination, p_tag
     INTEGER, OPTIONAL, INTENT(in) :: p_count, comm 
 #ifndef NOMPI
@@ -1990,7 +1955,7 @@ CONTAINS
 
   SUBROUTINE p_isend_real (buffer, p_destination, p_tag, p_count, comm)
 
-    REAL, INTENT(inout) :: buffer
+    REAL (dp), INTENT(inout) :: buffer
     INTEGER,   INTENT(in) :: p_destination, p_tag
     INTEGER, OPTIONAL, INTENT(in) :: p_count, comm
 #ifndef NOMPI
@@ -2026,7 +1991,7 @@ CONTAINS
 
   SUBROUTINE p_isend_real_1d (buffer, p_destination, p_tag, p_count, comm)
 
-    REAL, INTENT(inout) :: buffer(:)
+    REAL (dp), INTENT(inout) :: buffer(:)
     INTEGER,   INTENT(in) :: p_destination, p_tag
     INTEGER, OPTIONAL, INTENT(in) :: p_count, comm
 #ifndef NOMPI
@@ -2062,7 +2027,7 @@ CONTAINS
 
   SUBROUTINE p_isend_real_2d (buffer, p_destination, p_tag, p_count, comm)
 
-    REAL, INTENT(inout) :: buffer(:,:)
+    REAL (dp), INTENT(inout) :: buffer(:,:)
     INTEGER,   INTENT(in) :: p_destination, p_tag
     INTEGER, OPTIONAL, INTENT(in) :: p_count, comm
 
@@ -2099,7 +2064,7 @@ CONTAINS
 
   SUBROUTINE p_isend_real_3d (buffer, p_destination, p_tag, p_count, comm)
 
-    REAL, INTENT(inout) :: buffer(:,:,:)
+    REAL (dp), INTENT(inout) :: buffer(:,:,:)
     INTEGER,   INTENT(in) :: p_destination, p_tag
     INTEGER, OPTIONAL, INTENT(in) :: p_count, comm
 
@@ -2136,7 +2101,7 @@ CONTAINS
 
   SUBROUTINE p_isend_real_4d (buffer, p_destination, p_tag, p_count, comm)
 
-    REAL, INTENT(inout) :: buffer(:,:,:,:)
+    REAL (dp), INTENT(inout) :: buffer(:,:,:,:)
     INTEGER,   INTENT(in) :: p_destination, p_tag
     INTEGER, OPTIONAL, INTENT(in) :: p_count, comm
 
@@ -2173,7 +2138,7 @@ CONTAINS
 
   SUBROUTINE p_isend_real_5d (buffer, p_destination, p_tag, p_count, comm)
 
-    REAL, INTENT(inout) :: buffer(:,:,:,:,:)
+    REAL (dp), INTENT(inout) :: buffer(:,:,:,:,:)
     INTEGER,   INTENT(in) :: p_destination, p_tag
     INTEGER, OPTIONAL, INTENT(in) :: p_count, comm 
 
@@ -2620,7 +2585,7 @@ CONTAINS
 
   SUBROUTINE p_win_create_real_2d(buffer,p_win,comm)
 
-    REAL, INTENT(in) :: buffer(:,:)
+    REAL (dp), INTENT(in) :: buffer(:,:)
     INTEGER, INTENT(out) :: p_win
     INTEGER, OPTIONAL, INTENT(in) :: comm
 
@@ -2648,7 +2613,7 @@ CONTAINS
 
   SUBROUTINE p_win_create_real_3d(buffer,p_win,comm)
 
-    REAL, INTENT(in) :: buffer(:,:,:)
+    REAL (dp), INTENT(in) :: buffer(:,:,:)
     INTEGER, INTENT(out) :: p_win
     INTEGER, OPTIONAL, INTENT(in) :: comm
 
@@ -2759,7 +2724,7 @@ CONTAINS
 
   SUBROUTINE p_put_real_2d(buffer,p_destination,p_win,comm)
 
-    REAL, INTENT(in) :: buffer(:,:)
+    REAL (dp), INTENT(in) :: buffer(:,:)
     INTEGER, INTENT(in) :: p_destination, p_win
     INTEGER, OPTIONAL, INTENT(in) :: comm
 
@@ -2788,7 +2753,7 @@ CONTAINS
 
   SUBROUTINE p_put_real_3d(buffer,p_destination,p_win,comm)
 
-    REAL, INTENT(in) :: buffer(:,:,:)
+    REAL (dp), INTENT(in) :: buffer(:,:,:)
     INTEGER, INTENT(in) :: p_destination, p_win
     INTEGER, OPTIONAL, INTENT(in) :: comm
 
@@ -2819,7 +2784,7 @@ CONTAINS
 
   SUBROUTINE p_recv_real (buffer, p_source, p_tag, p_count, comm)
 
-    REAL, INTENT(out) :: buffer
+    REAL (dp), INTENT(out) :: buffer
     INTEGER,   INTENT(in)  :: p_source, p_tag
     INTEGER, OPTIONAL, INTENT(in) :: p_count, comm
 #ifndef NOMPI
@@ -2853,7 +2818,7 @@ CONTAINS
 
   SUBROUTINE p_recv_real_1d (buffer, p_source, p_tag, p_count, comm)
 
-    REAL, INTENT(out) :: buffer(:)
+    REAL (dp), INTENT(out) :: buffer(:)
     INTEGER,   INTENT(in)  :: p_source, p_tag
     INTEGER, OPTIONAL, INTENT(in) :: p_count, comm
 #ifndef NOMPI
@@ -2887,7 +2852,7 @@ CONTAINS
 
   SUBROUTINE p_recv_real_2d (buffer, p_source, p_tag, p_count, comm)
 
-    REAL, INTENT(out) :: buffer(:,:)
+    REAL (dp), INTENT(out) :: buffer(:,:)
     INTEGER,   INTENT(in)  :: p_source, p_tag
     INTEGER, OPTIONAL, INTENT(in) :: p_count, comm
 #ifndef NOMPI
@@ -2921,7 +2886,7 @@ CONTAINS
 
   SUBROUTINE p_recv_real_3d (buffer, p_source, p_tag, p_count, comm)
 
-    REAL, INTENT(out) :: buffer(:,:,:)
+    REAL (dp), INTENT(out) :: buffer(:,:,:)
     INTEGER,   INTENT(in)  :: p_source, p_tag
     INTEGER, OPTIONAL, INTENT(in) :: p_count, comm
 #ifndef NOMPI
@@ -2955,7 +2920,7 @@ CONTAINS
 
   SUBROUTINE p_recv_real_4d (buffer, p_source, p_tag, p_count, comm)
 
-    REAL, INTENT(out) :: buffer(:,:,:,:)
+    REAL (dp), INTENT(out) :: buffer(:,:,:,:)
     INTEGER,   INTENT(in)  :: p_source, p_tag
     INTEGER, OPTIONAL, INTENT(in) :: p_count, comm
 #ifndef NOMPI
@@ -2989,7 +2954,7 @@ CONTAINS
 
   SUBROUTINE p_recv_real_5d (buffer, p_source, p_tag, p_count, comm)
 
-    REAL, INTENT(out) :: buffer(:,:,:,:,:)
+    REAL (dp), INTENT(out) :: buffer(:,:,:,:,:)
     INTEGER,   INTENT(in)  :: p_source, p_tag
     INTEGER, OPTIONAL, INTENT(in) :: p_count, comm
 #ifndef NOMPI
@@ -3400,7 +3365,7 @@ CONTAINS
 
   SUBROUTINE p_irecv_real (buffer, p_source, p_tag, p_count, comm)
 
-    REAL, INTENT(out) :: buffer
+    REAL (dp), INTENT(out) :: buffer
     INTEGER,   INTENT(in) :: p_source, p_tag
     INTEGER, OPTIONAL, INTENT(in) :: p_count, comm
 #ifndef NOMPI
@@ -3436,7 +3401,7 @@ CONTAINS
 
   SUBROUTINE p_irecv_real_1d (buffer, p_source, p_tag, p_count, comm)
 
-    REAL, INTENT(out) :: buffer(:)
+    REAL (dp), INTENT(out) :: buffer(:)
     INTEGER,   INTENT(in) :: p_source, p_tag
     INTEGER, OPTIONAL, INTENT(in) :: p_count, comm
 #ifndef NOMPI
@@ -3472,7 +3437,7 @@ CONTAINS
 
   SUBROUTINE p_irecv_real_2d (buffer, p_source, p_tag, p_count, comm)
 
-    REAL, INTENT(out) :: buffer(:,:)
+    REAL (dp), INTENT(out) :: buffer(:,:)
     INTEGER,   INTENT(in) :: p_source, p_tag
     INTEGER, OPTIONAL, INTENT(in) :: p_count, comm
 
@@ -3509,7 +3474,7 @@ CONTAINS
 
   SUBROUTINE p_irecv_real_3d (buffer, p_source, p_tag, p_count, comm)
 
-    REAL, INTENT(out) :: buffer(:,:,:)
+    REAL (dp), INTENT(out) :: buffer(:,:,:)
     INTEGER,   INTENT(in) :: p_source, p_tag
     INTEGER, OPTIONAL, INTENT(in) :: p_count, comm
 
@@ -3546,7 +3511,7 @@ CONTAINS
 
   SUBROUTINE p_irecv_real_4d (buffer, p_source, p_tag, p_count, comm)
 
-    REAL, INTENT(out) :: buffer(:,:,:,:)
+    REAL (dp), INTENT(out) :: buffer(:,:,:,:)
     INTEGER,   INTENT(in) :: p_source, p_tag
     INTEGER, OPTIONAL, INTENT(in) :: p_count, comm
 
@@ -3586,9 +3551,9 @@ CONTAINS
   SUBROUTINE p_sendrecv_real_1d (sendbuf, p_dest, recvbuf, p_source, &
                                   p_tag, comm)
 
-    REAL, INTENT(in)           :: sendbuf (:)
+    REAL(dp), INTENT(in)           :: sendbuf (:)
     INTEGER,  INTENT(in)           :: p_dest
-    REAL, INTENT(out)          :: recvbuf (:)
+    REAL(dp), INTENT(out)          :: recvbuf (:)
     INTEGER,  INTENT(in)           :: p_source
     INTEGER,  INTENT(in)           :: p_tag
     INTEGER,  INTENT(in) ,OPTIONAL :: comm
@@ -3621,9 +3586,9 @@ CONTAINS
   SUBROUTINE p_sendrecv_real_2d (sendbuf, p_dest, recvbuf, p_source, &
                                   p_tag, comm)
 
-    REAL, INTENT(in)           :: sendbuf (:,:)
+    REAL(dp), INTENT(in)           :: sendbuf (:,:)
     INTEGER,  INTENT(in)           :: p_dest
-    REAL, INTENT(out)          :: recvbuf (:,:)
+    REAL(dp), INTENT(out)          :: recvbuf (:,:)
     INTEGER,  INTENT(in)           :: p_source
     INTEGER,  INTENT(in)           :: p_tag
     INTEGER,  INTENT(in) ,OPTIONAL :: comm
@@ -3656,9 +3621,9 @@ CONTAINS
   SUBROUTINE p_sendrecv_real_3d (sendbuf, p_dest, recvbuf, p_source, &
                                   p_tag, comm)
 
-    REAL, INTENT(in)           :: sendbuf (:,:,:)
+    REAL(dp), INTENT(in)           :: sendbuf (:,:,:)
     INTEGER,  INTENT(in)           :: p_dest
-    REAL, INTENT(out)          :: recvbuf (:,:,:)
+    REAL(dp), INTENT(out)          :: recvbuf (:,:,:)
     INTEGER,  INTENT(in)           :: p_source
     INTEGER,  INTENT(in)           :: p_tag
     INTEGER,  INTENT(in) ,OPTIONAL :: comm
@@ -3691,9 +3656,9 @@ CONTAINS
   SUBROUTINE p_sendrecv_real_4d (sendbuf, p_dest, recvbuf, p_source, &
                                   p_tag, comm)
 
-    REAL, INTENT(in)           :: sendbuf (:,:,:,:)
+    REAL(dp), INTENT(in)           :: sendbuf (:,:,:,:)
     INTEGER,  INTENT(in)           :: p_dest
-    REAL, INTENT(out)          :: recvbuf (:,:,:,:)
+    REAL(dp), INTENT(out)          :: recvbuf (:,:,:,:)
     INTEGER,  INTENT(in)           :: p_source
     INTEGER,  INTENT(in)           :: p_tag
     INTEGER,  INTENT(in) ,OPTIONAL :: comm
@@ -3724,17 +3689,15 @@ CONTAINS
   END SUBROUTINE p_sendrecv_real_4d
 
   ! bcast implementation
-  
+
   SUBROUTINE p_bcast_real (buffer, p_source, comm)
- ! print *, "mo_mpi.f90, subroutine p_bcast_real start"
-  !cDEC$ ATTRIBUTES NO_ARG_CHECK
-    REAL, INTENT(inout) :: buffer
+
+    REAL (dp), INTENT(inout) :: buffer
     INTEGER,   INTENT(in)    :: p_source
     INTEGER, OPTIONAL, INTENT(in) :: comm
 #ifndef NOMPI
     INTEGER :: p_comm
 
-   print *, "mo_mpi.f90, SUBROUTINE p_bcast_real"
     IF (PRESENT(comm)) THEN
        p_comm = comm
     ELSE
@@ -3764,19 +3727,17 @@ CONTAINS
     END IF
 #endif
 #endif
-  print *, "mo_mpi.f90, END SUBROUTINE p_bcast_real"
+
   END SUBROUTINE p_bcast_real
-       
 
   SUBROUTINE p_bcast_real_1d (buffer, p_source, comm)
 
-    REAL, INTENT(inout) :: buffer(:)
+    REAL (dp), INTENT(inout) :: buffer(:)
     INTEGER,   INTENT(in)    :: p_source
     INTEGER, OPTIONAL, INTENT(in) :: comm
 #ifndef NOMPI
     INTEGER :: p_comm
 
-    print *, "mo_mpi.f90, SUBROUTINE p_bcast_real_1d"
     IF (PRESENT(comm)) THEN
        p_comm = comm
     ELSE
@@ -3811,14 +3772,13 @@ CONTAINS
 
   SUBROUTINE p_bcast_real_2d (buffer, p_source, comm)
 
-    REAL, INTENT(inout) :: buffer(:,:)
+    REAL (dp), INTENT(inout) :: buffer(:,:)
     INTEGER,   INTENT(in)    :: p_source
     INTEGER, OPTIONAL, INTENT(in) :: comm
 
 #ifndef NOMPI
     INTEGER :: p_comm
 
-    print *, "mo_mpi.f90, SUBROUTINE p_bcast_real_2d"
     IF (PRESENT(comm)) THEN
        p_comm = comm
     ELSE
@@ -3853,14 +3813,13 @@ CONTAINS
 
   SUBROUTINE p_bcast_real_3d (buffer, p_source, comm)
 
-    REAL, INTENT(inout) :: buffer(:,:,:)
+    REAL (dp), INTENT(inout) :: buffer(:,:,:)
     INTEGER,   INTENT(in)    :: p_source
     INTEGER, OPTIONAL, INTENT(in) :: comm
 
 #ifndef NOMPI
     INTEGER :: p_comm
 
-    print *, "mo_mpi.f90, SUBROUTINE p_bcast_real_3d"
     IF (PRESENT(comm)) THEN
        p_comm = comm
     ELSE
@@ -3895,14 +3854,13 @@ CONTAINS
 
   SUBROUTINE p_bcast_real_4d (buffer, p_source, comm)
 
-    REAL, INTENT(inout) :: buffer(:,:,:,:)
+    REAL (dp), INTENT(inout) :: buffer(:,:,:,:)
     INTEGER,   INTENT(in)    :: p_source
     INTEGER, OPTIONAL, INTENT(in) :: comm
 
 #ifndef NOMPI
     INTEGER :: p_comm
 
-    print *, "mo_mpi.f90, SUBROUTINE p_bcast_real_4d"
     IF (PRESENT(comm)) THEN
        p_comm = comm
     ELSE
@@ -3944,8 +3902,6 @@ CONTAINS
 #ifndef NOMPI
     INTEGER :: p_comm
 
-
-    print *, "mo_mpi.f90, SUBROUTINE p_bcast_int_i4"
     IF (PRESENT(comm)) THEN
        p_comm = comm
     ELSE
@@ -3959,17 +3915,8 @@ CONTAINS
     IF (npes == 1) THEN
        RETURN
     ELSE
-       print *, "mo_mpi.f90, SUBROUTINE p_bcast_int_i4, CALL MPI_BCAST"
-       print *, "mo_mpi.f90, SUBROUTINE p_bcast_int_i4, CALL MPI_BCAST, buffer:", buffer
-       print *, "mo_mpi.f90, SUBROUTINE p_bcast_int_i4, CALL MPI_BCAST, p_int_i4:", p_int_i4
-       print *, "mo_mpi.f90, SUBROUTINE p_bcast_int_i4, CALL MPI_BCAST, p_source:", p_source
-       print *, "mo_mpi.f90, SUBROUTINE p_bcast_int_i4, CALL MPI_BCAST, p_comm:", p_comm
-       print *, "mo_mpi.f90, SUBROUTINE p_bcast_int_i4, CALL MPI_BCAST, p_error:", p_error
-       CALL MPI_BCAST (buffer, 1, MPI_INTEGER, p_source, &
+       CALL MPI_BCAST (buffer, 1, p_int_i4, p_source, &
             p_comm, p_error)
-       !CALL MPI_BCAST (buffer, 1, MPI_DOUBLE, p_source, &
-       !     p_comm, p_error)
-       print *, "mo_mpi.f90, SUBROUTINE p_bcast_int_i4, finish MPI_BCAST"
     ENDIF
 
 #ifdef DEBUG
@@ -3985,7 +3932,6 @@ CONTAINS
 #endif
 #endif
 
-  print *, "mo_mpi.f90, END SUBROUTINE p_bcast_int_i4"
   END SUBROUTINE p_bcast_int_i4
 
   SUBROUTINE p_bcast_int_i8 (buffer, p_source, comm)
@@ -3996,8 +3942,6 @@ CONTAINS
 
 #ifndef NOMPI
     INTEGER :: p_comm
-
-    print *, "mo_mpi.f90, SUBROUTINE p_bcast_int_i8"
 
     IF (PRESENT(comm)) THEN
        p_comm = comm
@@ -4040,8 +3984,6 @@ CONTAINS
 #ifndef NOMPI
     INTEGER :: p_comm
 
-    print *, "mo_mpi.f90, SUBROUTINE p_bcast_int_1d"
-
     IF (PRESENT(comm)) THEN
        p_comm = comm
     ELSE
@@ -4083,7 +4025,6 @@ CONTAINS
 #ifndef NOMPI
     INTEGER :: p_comm
 
-    print *, "mo_mpi.f90, SUBROUTINE p_bcast_int_2d"
     IF (PRESENT(comm)) THEN
        p_comm = comm
     ELSE
@@ -4125,7 +4066,6 @@ CONTAINS
 #ifndef NOMPI
     INTEGER :: p_comm
 
-    print *, "mo_mpi.f90, SUBROUTINE p_bcast_int_3d"
     IF (PRESENT(comm)) THEN
        p_comm = comm
     ELSE
@@ -4166,8 +4106,6 @@ CONTAINS
 
 #ifndef NOMPI
     INTEGER :: p_comm
-
-    print *, "mo_mpi.f90, SUBROUTINE p_bcast_int_4d"
 
     IF (PRESENT(comm)) THEN
        p_comm = comm
@@ -4211,8 +4149,6 @@ CONTAINS
 #ifndef NOMPI
     INTEGER :: p_comm
 
-    print *, "mo_mpi.f90, SUBROUTINE p_bcast_bool"
-
     IF (PRESENT(comm)) THEN
        p_comm = comm
     ELSE
@@ -4253,8 +4189,6 @@ CONTAINS
 
 #ifndef NOMPI
     INTEGER :: p_comm
-
-    print *, "mo_mpi.f90, SUBROUTINE p_bcast_bool_1d"
 
     IF (PRESENT(comm)) THEN
        p_comm = comm
@@ -4297,8 +4231,6 @@ CONTAINS
 #ifndef NOMPI
     INTEGER :: p_comm
 
-    print *, "mo_mpi.f90, SUBROUTINE p_bcast_bool_2d"
-
     IF (PRESENT(comm)) THEN
        p_comm = comm
     ELSE
@@ -4339,8 +4271,6 @@ CONTAINS
 
 #ifndef NOMPI
     INTEGER :: p_comm
-
-    print *, "mo_mpi.f90, SUBROUTINE p_bcast_bool_3d"    
 
     IF (PRESENT(comm)) THEN
        p_comm = comm
@@ -4383,8 +4313,6 @@ CONTAINS
 #ifndef NOMPI
     INTEGER :: p_comm
 
-    print *, "mo_mpi.f90, SUBROUTINE p_bcast_bool_4d"
-
     IF (PRESENT(comm)) THEN
        p_comm = comm
     ELSE
@@ -4425,7 +4353,6 @@ CONTAINS
 
 #ifndef NOMPI
     INTEGER :: p_comm
-    print *, "mo_mpi.f90, SUBROUTINE p_bcast_char"
 
     IF (PRESENT(comm)) THEN
        p_comm = comm
@@ -4484,7 +4411,7 @@ CONTAINS
   SUBROUTINE p_probe_real (buffer, p_tagcount, p_tagtable, p_source, &
 &                          p_tag, p_count, comm)
 
-    REAL, INTENT(in)  :: buffer
+    REAL (dp), INTENT(in)  :: buffer
     INTEGER,   INTENT(in)  :: p_tagcount, p_tagtable(:)
     INTEGER,   INTENT(out) :: p_source, p_tag, p_count
     INTEGER, OPTIONAL, INTENT(in) :: comm
@@ -4731,8 +4658,8 @@ CONTAINS
 
   FUNCTION p_sum_0d (zfield, comm) RESULT (p_sum)
 
-    REAL                      :: p_sum  
-    REAL,          INTENT(in) :: zfield
+    REAL(dp)                      :: p_sum  
+    REAL(dp),          INTENT(in) :: zfield
     INTEGER, OPTIONAL, INTENT(in) :: comm
 #ifndef NOMPI
     INTEGER :: p_comm
@@ -4757,9 +4684,9 @@ CONTAINS
 
   FUNCTION p_sum_1d (zfield, comm) RESULT (p_sum)
 
-    REAL,          INTENT(in) :: zfield(:)
+    REAL(dp),          INTENT(in) :: zfield(:)
     INTEGER, OPTIONAL, INTENT(in) :: comm
-    REAL                      :: p_sum (SIZE(zfield))
+    REAL(dp)                      :: p_sum (SIZE(zfield))
 
 #ifndef NOMPI
     INTEGER :: p_comm
@@ -4784,8 +4711,8 @@ CONTAINS
 
   FUNCTION p_max_0d (zfield, comm) RESULT (p_max)
 
-    REAL                      :: p_max  
-    REAL,          INTENT(in) :: zfield
+    REAL(dp)                      :: p_max  
+    REAL(dp),          INTENT(in) :: zfield
     INTEGER, OPTIONAL, INTENT(in) :: comm
 #ifndef NOMPI
     INTEGER :: p_comm
@@ -4810,9 +4737,9 @@ CONTAINS
 
   FUNCTION p_max_1d (zfield, comm) RESULT (p_max)
 
-    REAL,          INTENT(in) :: zfield(:)
+    REAL(dp),          INTENT(in) :: zfield(:)
     INTEGER, OPTIONAL, INTENT(in) :: comm
-    REAL                      :: p_max (SIZE(zfield))
+    REAL(dp)                      :: p_max (SIZE(zfield))
 
 #ifndef NOMPI
     INTEGER :: p_comm
@@ -4837,9 +4764,9 @@ CONTAINS
 
   FUNCTION p_max_2d (zfield, comm) RESULT (p_max)
 
-    REAL,          INTENT(in) :: zfield(:,:)
+    REAL(dp),          INTENT(in) :: zfield(:,:)
     INTEGER, OPTIONAL, INTENT(in) :: comm
-    REAL                      :: p_max (SIZE(zfield,1),SIZE(zfield,2))
+    REAL(dp)                      :: p_max (SIZE(zfield,1),SIZE(zfield,2))
 
 #ifndef NOMPI
     INTEGER :: p_comm
@@ -4864,9 +4791,9 @@ CONTAINS
 
   FUNCTION p_max_3d (zfield, comm) RESULT (p_max)
 
-    REAL,          INTENT(in) :: zfield(:,:,:)
+    REAL(dp),          INTENT(in) :: zfield(:,:,:)
     INTEGER, OPTIONAL, INTENT(in) :: comm
-    REAL                      :: p_max (SIZE(zfield,1),SIZE(zfield,2)&
+    REAL(dp)                      :: p_max (SIZE(zfield,1),SIZE(zfield,2)&
                                            ,SIZE(zfield,3))  
 
 #ifndef NOMPI
@@ -4892,9 +4819,9 @@ CONTAINS
 
   FUNCTION p_min_0d (zfield, comm) RESULT (p_min)
 
-    REAL,          INTENT(in) :: zfield
+    REAL(dp),          INTENT(in) :: zfield
     INTEGER, OPTIONAL, INTENT(in) :: comm
-    REAL                      :: p_min  
+    REAL(dp)                      :: p_min  
 #ifndef NOMPI
     INTEGER :: p_comm
 
@@ -4918,9 +4845,9 @@ CONTAINS
 
   FUNCTION p_min_1d (zfield, comm) RESULT (p_min)
 
-    REAL,          INTENT(in) :: zfield(:)
+    REAL(dp),          INTENT(in) :: zfield(:)
     INTEGER, OPTIONAL, INTENT(in) :: comm
-    REAL                      :: p_min (SIZE(zfield))
+    REAL(dp)                      :: p_min (SIZE(zfield))
 
 #ifndef NOMPI
     INTEGER :: p_comm
@@ -4945,9 +4872,9 @@ CONTAINS
 
   FUNCTION p_min_2d (zfield, comm) RESULT (p_min)
 
-    REAL,          INTENT(in) :: zfield(:,:)
+    REAL(dp),          INTENT(in) :: zfield(:,:)
     INTEGER, OPTIONAL, INTENT(in) :: comm
-    REAL                      :: p_min (SIZE(zfield,1),SIZE(zfield,2))
+    REAL(dp)                      :: p_min (SIZE(zfield,1),SIZE(zfield,2))
 
 #ifndef NOMPI
     INTEGER :: p_comm
@@ -4972,9 +4899,9 @@ CONTAINS
 
   FUNCTION p_min_3d (zfield, comm) RESULT (p_min)
 
-    REAL,          INTENT(in) :: zfield(:,:,:)
+    REAL(dp),          INTENT(in) :: zfield(:,:,:)
     INTEGER, OPTIONAL, INTENT(in) :: comm
-    REAL                      :: p_min (SIZE(zfield,1),SIZE(zfield,2)&
+    REAL(dp)                      :: p_min (SIZE(zfield,1),SIZE(zfield,2)&
                                            ,SIZE(zfield,3))  
 #ifndef NOMPI
     INTEGER :: p_comm

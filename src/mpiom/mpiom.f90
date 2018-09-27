@@ -281,17 +281,11 @@
 
 !     Initialize MPI
 
-      print *, "mpiom.f90, call p_start"
-
       CALL p_start
-
-      print *, "mpiom.f90, return from p_start"
 
 !     SPECIFY LOGICAL I/O UNITS
 
-      print *, "mpiom.f90, call SETUNITS"
       CALL SETUNITS
-      print *, "mpiom.f90, return from SETUNITS"
 !  OPEN STD OUT FILE
 !  This is needed for the MPI version since we do not want
 !  the output of all processors intermixed (and basically
@@ -313,17 +307,11 @@
         READ(IO_IN_OCTL,NPROCS)
 !	 write(0,*)'read decomposition'
       ENDIF
-      
-      print *, "mpiom.f90, call p_bcast 1st"
-      print *, "ie_g: ", ie_g, ", p_io: ", p_io
+
       CALL p_bcast(ie_g,p_io)
-      print *, "mpiom.f90, return p_bcast 1st"
-      print *, "mpiom.f90, call p_bcast 2st"
       CALL p_bcast(je_g,p_io)
-      print *, "mpiom.f90, return p_bcast 2st"
-      print *, "mpiom.f90, call p_bcast 2st"
       CALL p_bcast(ke,p_io)
-      print *, "mpiom.f90, return p_bcast 3st"
+
 !     Domain decomposition, setting local IE and JE
 !       write(0,*)'vor deco'
 
@@ -341,7 +329,6 @@
       CALL alloc_mem_diag
 
       CALL alloc_mem_dilcor
-      print *, "mpiom.f90, return alloc_mem_dilcor"
 
 
 
@@ -384,8 +371,6 @@
 !      write(0,*)'vor beleg'
 
       CALL BELEG_ZERO
-      print *, "mpiom.f90, return BELEG_ZERO"
-      
 
 
 !  DEFAULT LENGTH OF INTEGRATION
